@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32h7xx_it.h"
+#include "stdio.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -41,7 +42,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern volatile uint8_t Flag_dma1stream0IRQ;
+extern volatile uint8_t Flag_dma1stream1IRQ;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,11 +57,11 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+/* USER CODE BEGIN EV */
 extern DMA_HandleTypeDef hdma_adc1;
 extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_usart1_tx;
-/* USER CODE BEGIN EV */
-
+extern UART_HandleTypeDef huart1;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -86,14 +88,23 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+//  __asm volatile
+//  (
+//    "TST LR, #4\n"
+//    "ITE EQ\n"
+//    "MRSEQ R0, MSP\n"
+//    "MRSNE R0, PSP\n"
+//    "B HardFault_Handler_C\n"
+//  );
   /* USER CODE END HardFault_IRQn 0 */
+	
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
+
 
 /**
   * @brief This function handles Memory management fault.
@@ -199,18 +210,29 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
-
+void USART1_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart1);
+}
 /**
   * @brief This function handles DMA1 stream0 global interrupt.
   */
 void DMA1_Stream0_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+//  DMA_Check_Flags(&hdma_adc1);
+	
+	// 多种中断被置位了，这里选择TCIF作为区别标志，执行后续操作
+	if(__HAL_DMA_GET_FLAG(&hdma_adc1, DMA_FLAG_TCIF0_4))  
+	{
+		HAL_ADC_Stop_DMA(&hadc1);
+		__HAL_DMA_CLEAR_FLAG(&hdma_adc1, DMA_FLAG_TCIF0_4);
+		/* 以下中断函数把所有flag置位为0 */
+    HAL_DMA_IRQHandler(&hdma_adc1);
 
-  /* USER CODE END DMA1_Stream0_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_adc1);
-  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
-
+	  Flag_dma1stream0IRQ = 1;
+	}
+		  Flag_dma1stream0IRQ = 1;
   /* USER CODE END DMA1_Stream0_IRQn 1 */
 }
 
@@ -219,13 +241,15 @@ void DMA1_Stream0_IRQHandler(void)
   */
 void DMA1_Stream1_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart1_tx);
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 1 */
+//	DMA_Check_Flags(&hdma_usart1_tx);
+	if(__HAL_DMA_GET_FLAG(&hdma_usart1_tx, DMA_FLAG_TCIF1_5))  
+	{
+		__HAL_DMA_CLEAR_FLAG(&hdma_usart1_tx, DMA_FLAG_TCIF1_5);
+//	  HAL_DMA_IRQHandler(&hdma_usart1_tx); 
+		Flag_dma1stream1IRQ = 1;
+//		hdma_usart1_tx.State = HAL_DMA_STATE_READY;
+	}
+	HAL_DMA_IRQHandler(&hdma_usart1_tx); 
 }
 
 /**
@@ -243,5 +267,30 @@ void ADC_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+/* USER CODE BEGIN 1 */
+void DMA_Check_Flags(DMA_HandleTypeDef *hdma)
+{
+    printf("\r\nDMA1Stream1 Flags Status:\r\n");
+    
+    // 检查传输完成标志
+    printf("TCIF: %d\r\n", 
+           (DMA1->LISR & DMA_FLAG_TCIF1_5) ? 1 : 0);
+    
+    // 检查半传输标志
+    printf("HTIF: %d\r\n", 
+           (DMA1->LISR & DMA_FLAG_HTIF1_5) ? 1 : 0);
+    
+    // 检查传输错误标志
+    printf("TEIF: %d\r\n", 
+           (DMA1->LISR & DMA_FLAG_TEIF1_5) ? 1 : 0);
+    
+    // 检查直接模式错误标志
+    printf("DMEIF: %d\r\n", 
+           (DMA1->LISR & DMA_FLAG_DMEIF1_5) ? 1 : 0);
+    
+    // 检查FIFO错误标志
+    printf("FEIF: %d\r\n", 
+           (DMA1->LISR & DMA_FLAG_FEIF1_5) ? 1 : 0);
+}
 
 /* USER CODE END 1 */

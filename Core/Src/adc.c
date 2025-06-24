@@ -56,6 +56,7 @@ void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIG_T8_TRGO2;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
   hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_ONESHOT;
+//	hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
   hadc1.Init.OversamplingMode = DISABLE;
@@ -77,7 +78,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_16CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -87,38 +88,33 @@ void MX_ADC1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN ADC1_Init 2 */
+	if(HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
   /* USER CODE END ADC1_Init 2 */
 
 }
+
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+	
+
   if(adcHandle->Instance==ADC1)
   {
-  /* USER CODE BEGIN ADC1_MspInit 0 */
-
-  /* USER CODE END ADC1_MspInit 0 */
-
-  /** Initializes the peripherals clock
-  */
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    PeriphClkInitStruct.PLL2.PLL2M = 25;
-    PeriphClkInitStruct.PLL2.PLL2N = 504;
-    PeriphClkInitStruct.PLL2.PLL2P = 7;
-    PeriphClkInitStruct.PLL2.PLL2Q = 2;
-    PeriphClkInitStruct.PLL2.PLL2R = 2;
-    PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_0;
-    PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
-    PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
-    PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-    {
-      Error_Handler();
-    }
+  
+		/** Initializes the peripherals clock */
+		PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+		PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_CLKP;
+		if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
     /* ADC1 clock enable */
     __HAL_RCC_ADC12_CLK_ENABLE();
@@ -141,7 +137,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_adc1.Init.Mode = DMA_NORMAL;
+    hdma_adc1.Init.Mode = DMA_CIRCULAR;
+//		hdma_adc1.Init.Mode = DMA_NORMAL;
     hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
@@ -151,12 +148,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 
     __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc1);
 
-    /* ADC1 interrupt Init */
-    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(ADC_IRQn);
-  /* USER CODE BEGIN ADC1_MspInit 1 */
+//    /* ADC1 interrupt Init */
+//    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
+//    HAL_NVIC_EnableIRQ(ADC_IRQn);
+		
 
-  /* USER CODE END ADC1_MspInit 1 */
   }
 }
 

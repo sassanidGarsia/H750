@@ -7,12 +7,12 @@ stm32h750\ scheme3/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\CMSIS\Device\ST\STM32H7xx\Include\stm32h750xx.h \
   ..\Drivers\CMSIS\Include\core_cm7.h \
   D:\Keil_v5.39\ARM\ARMCLANG\include\stdint.h \
-  D:\Keil_v5.39\Program\ Location\STM32H750\ Scheme3+ADC\ DMA\Drivers\CMSIS\Include\cmsis_version.h \
-  D:\Keil_v5.39\Program\ Location\STM32H750\ Scheme3+ADC\ DMA\Drivers\CMSIS\Include\cmsis_compiler.h \
-  D:\Keil_v5.39\Program\ Location\STM32H750\ Scheme3+ADC\ DMA\Drivers\CMSIS\Include\cmsis_armclang.h \
+  D:\Keil_v5.39\Program\ Location\STM32H750\ test\Drivers\CMSIS\Include\cmsis_version.h \
+  D:\Keil_v5.39\Program\ Location\STM32H750\ test\Drivers\CMSIS\Include\cmsis_compiler.h \
+  D:\Keil_v5.39\Program\ Location\STM32H750\ test\Drivers\CMSIS\Include\cmsis_armclang.h \
   D:\Keil_v5.39\ARM\ARMCLANG\include\arm_compat.h \
   D:\Keil_v5.39\ARM\ARMCLANG\include\arm_acle.h \
-  D:\Keil_v5.39\Program\ Location\STM32H750\ Scheme3+ADC\ DMA\Drivers\CMSIS\Include\mpu_armv7.h \
+  D:\Keil_v5.39\Program\ Location\STM32H750\ test\Drivers\CMSIS\Include\mpu_armv7.h \
   ..\Drivers\CMSIS\Device\ST\STM32H7xx\Include\system_stm32h7xx.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\Legacy\stm32_hal_legacy.h \
   D:\Keil_v5.39\ARM\ARMCLANG\include\stddef.h \
@@ -41,4 +41,5 @@ stm32h750\ scheme3/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal_uart_ex.h \
   ..\Core\Inc\adc.h ..\Core\Inc\dma.h ..\Core\Inc\memorymap.h \
   ..\Core\Inc\tim.h ..\Core\Inc\usart.h ..\Core\Inc\gpio.h \
-  D:\Keil_v5.39\ARM\ARMCLANG\include\stdio.h
+  D:\Keil_v5.39\ARM\ARMCLANG\include\stdio.h \
+  D:\Keil_v5.39\ARM\ARMCLANG\include\string.h
